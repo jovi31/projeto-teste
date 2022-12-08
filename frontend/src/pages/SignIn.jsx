@@ -3,8 +3,6 @@ import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import TextField from "@material-ui/core/TextField";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
 import Link from "@material-ui/core/Link";
 import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
@@ -14,6 +12,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 import { login } from "../api/Auth";
 import { useNavigate } from "react-router-dom";
+import CustomizedSnackbars from "../components/CustomizedSnackbars";
 
 function Copyright() {
   return (
@@ -50,13 +49,29 @@ const useStyles = makeStyles((theme) => ({
 
 export default function SignIn() {
   const classes = useStyles();
-  const [message, setMessage] = React.useState('');
-  const navigate = useNavigate()
+  const [message, setMessage] = React.useState("");
+  const [openSnackbar, setOpenSnackbar] = React.useState(false);
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    if (message) {
+      setOpenSnackbar(true)
+    }
+  }, [message])
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     login(data, setMessage, navigate);
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
+    setMessage("")
   };
 
   return (
@@ -103,7 +118,7 @@ export default function SignIn() {
           </Button>
           <Grid container>
             <Grid item>
-              <Link href="#" variant="body2">
+              <Link href="/signup" variant="body2">
                 {"Don't have an account? Sign Up"}
               </Link>
             </Grid>
@@ -113,6 +128,8 @@ export default function SignIn() {
       <Box mt={8}>
         <Copyright />
       </Box>
+
+      <CustomizedSnackbars message={message} open={openSnackbar} handleClose={handleCloseSnackbar} />
     </Container>
   );
 }

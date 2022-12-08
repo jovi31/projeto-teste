@@ -17,7 +17,8 @@ def add_user():
         db.session.commit()
         return jsonify(user.serialize())
     except exc.SQLAlchemyError as error:
-        return (str(error.__dict__["orig"]), 400)
+        error_message = str(error.__dict__["orig"])
+        return jsonify({ 'message': error_message }), 400
 
 
 @token_required

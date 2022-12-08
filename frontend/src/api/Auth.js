@@ -1,5 +1,29 @@
 import axios from "axios";
 
+
+export const signup = (data, setMessage, navigate) => {
+  axios
+    .post(
+      `http://127.0.0.1:5000/users/`,
+      {
+        name: data.get("name"),
+        username: data.get("username"),
+        password: data.get("password")
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        }
+      }
+    )
+    .then((res) => {
+      login(data, setMessage, navigate)
+    })
+    .catch((err) => {
+      setMessage(err.response.data.message);
+    });
+}
+
 export const login = (data, setMessage, navigate) => {
   axios
     .post(
@@ -17,8 +41,8 @@ export const login = (data, setMessage, navigate) => {
     )
     .then((res) => {
       localStorage.setItem("token", res.data.token);
-      navigate("/home");
-    //   window.location.reload();
+      navigate("/");
+      //   window.location.reload();
     })
     .catch((err) => {
       setMessage(err.response.data.message);
