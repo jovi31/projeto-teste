@@ -66,9 +66,22 @@ def delete_project(current_user, id):
 
 @token_required
 def get_user_projects(current_user):
+    rows_per_page = 5
+    page = int(request.args["page"])
+    offset = rows_per_page * (page - 1)
     try:
-        projects = Project.query.filter_by(author_id=current_user.id)
-        return jsonify([project.serialize() for project in projects])
+        projects = db.session.query(Project).filter_by(author_id=current_user.id)
+        length = projects.count()
+        projects = projects.offset(offset)
+        projects = projects.limit(rows_per_page)
+        hasNextPage = (offset + projects.count()) < length
+        response = {
+            "length": length,
+            "page": page,
+            "results": [project.serialize() for project in projects],
+            "hasNextPage": hasNextPage
+        }
+        return jsonify(response)
     except exc.SQLAlchemyError as error:
         return (str(error.__dict__["orig"]), 400)
 
