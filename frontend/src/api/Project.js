@@ -12,3 +12,53 @@ export const getAllUserProjects = (setProjects, setMessage) => {
       setMessage(err.response.data.message);
     });
 };
+
+export const addProject = (project, setMessage, callback) => {
+  axios
+    .post(
+      `http://127.0.0.1:5000/projects/`,
+      { ...project },
+      {
+        headers: { Authorization: localStorage.getItem("token") },
+      }
+    )
+    .then(() => {
+      callback();
+    })
+    .catch((err) => {
+      setMessage(err.response.data.message);
+    });
+};
+
+export const updateProject = (project, setMessage, callback) => {
+  axios
+    .put(
+      `http://127.0.0.1:5000/projects/${project.id}`,
+      { ...project },
+      {
+        headers: { Authorization: localStorage.getItem("token") },
+      }
+    )
+    .then((res) => {
+      callback();
+    })
+    .catch((err) => {
+      setMessage(err.response.data.message);
+    });
+};
+
+export const deleteProject = (projectId, setMessage, callback) => {
+  axios
+    .delete(
+      `http://127.0.0.1:5000/projects/${projectId}`,
+      {
+        headers: { Authorization: localStorage.getItem("token") },
+      }
+    )
+    .then((res) => {
+      callback();
+    })
+    .catch((err) => {
+      setMessage(err.response.data.message);
+    });
+};

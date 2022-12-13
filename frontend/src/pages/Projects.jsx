@@ -1,40 +1,86 @@
 import React from "react";
 import { useState } from "react";
 import { useEffect } from "react";
-import { Table } from "@material-ui/core";
+import { Button, Table } from "@material-ui/core";
 import { TableBody } from "@material-ui/core";
 import { TableCell } from "@material-ui/core";
 import { TableContainer } from "@material-ui/core";
 import { TableHead } from "@material-ui/core";
 import { TableRow } from "@material-ui/core";
 import { Paper } from "@material-ui/core";
-import { Button } from "@material-ui/core";
+import { IconButton } from "@material-ui/core";
+import EditRoundedIcon from "@material-ui/icons/EditRounded";
+import DeleteRoundedIcon from "@material-ui/icons/DeleteRounded";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 
 import MenuAppBar from "../components/MenuAppBar";
 import ProjectFormDialog from "../components/ProjectFormDialog";
 import { isoToLocaleDate, formatNumberAsCurrency } from "../utils";
-import { getAllUserProjects } from "../api/Project";
+import { getAllUserProjects, deleteProject } from "../api/Project";
 
 export default function Projects(props) {
   const { user } = props;
   const [projects, setProjects] = useState([]);
+  const [currentProject, setCurrentProject] = useState();
   const [message, setMessage] = useState("");
   const [formDialogOpen, setFormDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
-    getAllUserProjects(setProjects, setMessage);
-  }, [projects]);
+    updateProjects();
+  }, []);
 
-  const handleEditButtonClick = () => {
+  const updateProjects = () => {
+    getAllUserProjects(setProjects, setMessage);
+  };
+
+  const handleEditButtonClick = (currentProject) => {
+    setCurrentProject(currentProject);
     setFormDialogOpen(true);
+  };
+
+  const handleCreateButtonClick = () => {
+    setCurrentProject({});
+    setFormDialogOpen(true);
+  };
+
+  const handleDeleteButtonClick = (project) => {
+    setCurrentProject(project);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDeleteButtonClick = () => {
+    deleteProject(currentProject.id, setMessage, handleDeleteDialogClose);
   };
 
   const handleFormDialogClose = () => {
     setFormDialogOpen(false);
+    reset();
+  };
+
+  const handleDeleteDialogClose = () => {
+    setDeleteDialogOpen(false);
+    reset();
+  };
+
+  const reset = () => {
+    setCurrentProject(null);
+    getAllUserProjects(setProjects, setMessage);
   };
 
   return (
     <MenuAppBar title="Projects" user={user}>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handleCreateButtonClick}
+      >
+        Novo Projeto
+      </Button>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="projects">
           <TableHead>
@@ -63,24 +109,58 @@ export default function Projects(props) {
                 <TableCell>{project.done ? "Sim" : "Não"}</TableCell>
                 <TableCell>{project.author.name}</TableCell>
                 <TableCell>
-                  <Button
-                    variant="outlined"
+                  <IconButton
                     color="primary"
-                    onClick={handleEditButtonClick}
+                    onClick={() => handleEditButtonClick(project)}
                   >
-                    Editar
-                  </Button>
-                  <ProjectFormDialog
-                    project={project}
-                    handleClose={handleFormDialogClose}
-                    open={formDialogOpen}
-                  />
+                    <EditRoundedIcon />
+                  </IconButton>
+                  <IconButton
+                    color="secondary"
+                    onClick={() => handleDeleteButtonClick(project)}
+                  >
+                    <DeleteRoundedIcon />
+                  </IconButton>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
+      {currentProject ? (
+        <ProjectFormDialog
+          currentProject={currentProject}
+          handleClose={handleFormDialogClose}
+          open={formDialogOpen}
+        />
+      ) : null}
+
+      {currentProject ? (
+        <Dialog
+          open={deleteDialogOpen}
+          onClose={handleDeleteDialogClose}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">
+            {"Confirmação de exclusão"}
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              {currentProject &&
+                `Deseja continuar e excluir o projeto "${currentProject.title}"?`}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleConfirmDeleteButtonClick} color="primary">
+              Sim
+            </Button>
+            <Button onClick={handleDeleteDialogClose} color="primary">
+              Não
+            </Button>
+          </DialogActions>
+        </Dialog>
+      ) : null}
     </MenuAppBar>
   );
 }
