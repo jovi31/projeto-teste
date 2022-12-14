@@ -19,23 +19,25 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 
 import MenuAppBar from "../components/MenuAppBar";
 import ProjectFormDialog from "../components/ProjectFormDialog";
+import Pagination from "../components/Pagination";
 import { isoToLocaleDate, formatNumberAsCurrency } from "../utils";
 import { getAllUserProjects, deleteProject } from "../api/Project";
 
 export default function Projects(props) {
   const { user } = props;
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState({});
   const [currentProject, setCurrentProject] = useState();
   const [message, setMessage] = useState("");
+  const [page, setPage] = useState(1);
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     updateProjects();
-  }, []);
+  }, [page]);
 
   const updateProjects = () => {
-    getAllUserProjects(setProjects, setMessage);
+    getAllUserProjects(page, setProjects, setMessage);
   };
 
   const handleEditButtonClick = (currentProject) => {
@@ -69,7 +71,8 @@ export default function Projects(props) {
 
   const reset = () => {
     setCurrentProject(null);
-    getAllUserProjects(setProjects, setMessage);
+    setProjects(null);
+    getAllUserProjects(page, setProjects, setMessage);
   };
 
   return (
@@ -96,37 +99,44 @@ export default function Projects(props) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {projects.map((project) => (
-              <TableRow
-                key={project.id}
-                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-              >
-                <TableCell>{project.title}</TableCell>
-                <TableCell>{project.description}</TableCell>
-                <TableCell>{formatNumberAsCurrency(project.cost)}</TableCell>
-                <TableCell>{isoToLocaleDate(project.created_at)}</TableCell>
-                <TableCell>{isoToLocaleDate(project.updated_at)}</TableCell>
-                <TableCell>{project.done ? "Sim" : "Não"}</TableCell>
-                <TableCell>{project.author.name}</TableCell>
-                <TableCell>
-                  <IconButton
-                    color="primary"
-                    onClick={() => handleEditButtonClick(project)}
-                  >
-                    <EditRoundedIcon />
-                  </IconButton>
-                  <IconButton
-                    color="secondary"
-                    onClick={() => handleDeleteButtonClick(project)}
-                  >
-                    <DeleteRoundedIcon />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
+            {projects &&
+              projects.results &&
+              projects.results.map((project) => (
+                <TableRow
+                  key={project.id}
+                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                >
+                  <TableCell>{project.title}</TableCell>
+                  <TableCell>{project.description}</TableCell>
+                  <TableCell>{formatNumberAsCurrency(project.cost)}</TableCell>
+                  <TableCell>{isoToLocaleDate(project.created_at)}</TableCell>
+                  <TableCell>{isoToLocaleDate(project.updated_at)}</TableCell>
+                  <TableCell>{project.done ? "Sim" : "Não"}</TableCell>
+                  <TableCell>{project.author.name}</TableCell>
+                  <TableCell>
+                    <IconButton
+                      color="primary"
+                      onClick={() => handleEditButtonClick(project)}
+                    >
+                      <EditRoundedIcon />
+                    </IconButton>
+                    <IconButton
+                      color="secondary"
+                      onClick={() => handleDeleteButtonClick(project)}
+                    >
+                      <DeleteRoundedIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </TableContainer>
+
+      {projects && projects.length && (
+        <Pagination page={page} pageCount={projects.length} setPage={setPage} />
+      )}
+
       {currentProject ? (
         <ProjectFormDialog
           currentProject={currentProject}

@@ -1,9 +1,10 @@
 import axios from "axios";
 
-export const getAllUserProjects = (setProjects, setMessage) => {
+export const getAllUserProjects = (page, setProjects, setMessage) => {
   axios
     .get("http://127.0.0.1:5000/projects/", {
-      headers: { Authorization: localStorage.getItem("token") },
+      params: { page },
+      headers: { Authorization: localStorage.getItem("token") }
     })
     .then((res) => {
       setProjects(res.data);
@@ -49,12 +50,9 @@ export const updateProject = (project, setMessage, callback) => {
 
 export const deleteProject = (projectId, setMessage, callback) => {
   axios
-    .delete(
-      `http://127.0.0.1:5000/projects/${projectId}`,
-      {
-        headers: { Authorization: localStorage.getItem("token") },
-      }
-    )
+    .delete(`http://127.0.0.1:5000/projects/${projectId}`, {
+      headers: { Authorization: localStorage.getItem("token") },
+    })
     .then((res) => {
       callback();
     })

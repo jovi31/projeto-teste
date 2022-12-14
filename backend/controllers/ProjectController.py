@@ -1,3 +1,5 @@
+import math
+
 from flask import jsonify, request
 from models import Project
 from database.database import db
@@ -76,7 +78,7 @@ def get_user_projects(current_user):
         projects = projects.limit(rows_per_page)
         hasNextPage = (offset + projects.count()) < length
         response = {
-            "length": length,
+            "length": math.ceil(length / rows_per_page),
             "page": page,
             "results": [project.serialize() for project in projects],
             "hasNextPage": hasNextPage
