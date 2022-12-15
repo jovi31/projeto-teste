@@ -6,8 +6,16 @@ import { useEffect } from "react";
 
 function listPages(page, pageCount, siblingCount = 2)  {
   const pages = [];
-  let startPage = Math.max(1, page - siblingCount);
-  let endPage = Math.min(pageCount, page + siblingCount);
+  let startPage = page - siblingCount;
+  let endPage = page + siblingCount;
+  
+  if(startPage < 1) {
+    startPage = 1;
+    endPage = Math.min(pageCount, 1 + 2 * siblingCount);
+  } else if(endPage > pageCount) {
+    endPage = pageCount;
+    startPage = Math.max(1, endPage - 2 * siblingCount);
+  }
 
   if(startPage == endPage)
     return [1];
