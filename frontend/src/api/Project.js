@@ -4,7 +4,7 @@ export const getAllUserProjects = (page, setProjects, setMessage) => {
   axios
     .get("http://127.0.0.1:5000/projects/", {
       params: { page },
-      headers: { Authorization: localStorage.getItem("token") }
+      headers: { Authorization: localStorage.getItem("token") },
     })
     .then((res) => {
       setProjects(res.data);
@@ -53,6 +53,23 @@ export const deleteProject = (projectId, setMessage, callback) => {
     .delete(`http://127.0.0.1:5000/projects/${projectId}`, {
       headers: { Authorization: localStorage.getItem("token") },
     })
+    .then((res) => {
+      callback();
+    })
+    .catch((err) => {
+      setMessage(err.response.data.message);
+    });
+};
+
+export const checkProject = (project, setMessage, callback) => {
+  axios
+    .patch(
+      `http://127.0.0.1:5000/projects/${project.id}/check`,
+      { ...project },
+      {
+        headers: { Authorization: localStorage.getItem("token") },
+      }
+    )
     .then((res) => {
       callback();
     })

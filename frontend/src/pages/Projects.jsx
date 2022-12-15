@@ -11,6 +11,7 @@ import { Paper } from "@material-ui/core";
 import { IconButton } from "@material-ui/core";
 import EditRoundedIcon from "@material-ui/icons/EditRounded";
 import DeleteRoundedIcon from "@material-ui/icons/DeleteRounded";
+import DoneRoundedIcon from "@material-ui/icons/DoneRounded";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -21,7 +22,7 @@ import MenuAppBar from "../components/MenuAppBar";
 import ProjectFormDialog from "../components/ProjectFormDialog";
 import Pagination from "../components/Pagination";
 import { isoToLocaleDate, formatNumberAsCurrency } from "../utils";
-import { getAllUserProjects, deleteProject } from "../api/Project";
+import { getAllUserProjects, deleteProject, checkProject } from "../api/Project";
 
 export default function Projects(props) {
   const { user } = props;
@@ -53,6 +54,10 @@ export default function Projects(props) {
   const handleDeleteButtonClick = (project) => {
     setCurrentProject(project);
     setDeleteDialogOpen(true);
+  };
+
+  const handleDoneButtonClick = (project) => {
+    checkProject(project, setMessage, reset)
   };
 
   const handleConfirmDeleteButtonClick = () => {
@@ -126,6 +131,15 @@ export default function Projects(props) {
                     >
                       <DeleteRoundedIcon />
                     </IconButton>
+
+                    {!project.done ? (
+                      <IconButton
+                        style={{ color: "#0a0" }}
+                        onClick={() => handleDoneButtonClick(project)}
+                      >
+                        <DoneRoundedIcon />
+                      </IconButton>
+                    ) : null}
                   </TableCell>
                 </TableRow>
               ))}

@@ -89,6 +89,21 @@ def get_user_projects(current_user):
 
 
 @token_required
+def check_project(current_user, id):
+    try:
+        project = Project.query.filter_by(id=id).one()
+
+        if project.author_id != current_user.id:
+            return ("O projeto não pertence ao usuário", 400)
+        
+        project.done = True
+        db.session.commit()
+        return ("Projeto marcado como concluído.", 200)
+    except exc.SQLAlchemyError as error:
+        return (str(error.__dict__["orig"]), 400)
+
+
+@token_required
 def get_project(current_user, id):
     try:
         project = Project.query.filter_by(id=id, author_id=current_user.id).one()
